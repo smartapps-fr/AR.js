@@ -375,7 +375,13 @@ AFRAME.registerComponent('gps-camera', {
     _onDeviceOrientation: function (event) {
         if (event.webkitCompassHeading !== undefined) {
             if (event.webkitCompassAccuracy < 50) {
-                this.heading = event.webkitCompassHeading;
+                if (window.matchMedia("(orientation: portrait)").matches) {
+                    // portrait
+                    this.heading = event.webkitCompassHeading;
+                } else {
+                    // landscape
+                    this.heading = (event.webkitCompassHeading + 90) % 360;
+                }
             } else {
                 console.warn('webkitCompassAccuracy is event.webkitCompassAccuracy');
             }

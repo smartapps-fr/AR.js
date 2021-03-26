@@ -4784,11 +4784,11 @@ AFRAME.registerComponent('gps-camera', {
                 accuracy: position.coords.accuracy,
                 altitudeAccuracy: position.coords.altitudeAccuracy,
             };
-          
+
             if (this.data.simulateAltitude !== 0) {
                 localPosition.altitude = this.data.simulateAltitude;
             }
-               
+
             if (this.data.simulateLatitude !== 0 && this.data.simulateLongitude !== 0) {
                 localPosition.latitude = this.data.simulateLatitude;
                 localPosition.longitude = this.data.simulateLongitude;
@@ -5039,7 +5039,14 @@ AFRAME.registerComponent('gps-camera', {
     _onDeviceOrientation: function (event) {
         if (event.webkitCompassHeading !== undefined) {
             if (event.webkitCompassAccuracy < 50) {
-                this.heading = event.webkitCompassHeading;
+                // console.log('webkitCompassHeading = ' + event.webkitCompassHeading);
+                if (window.matchMedia("(orientation: portrait)").matches) {
+                    // portrait
+                    this.heading = event.webkitCompassHeading;
+                } else {
+                    // landscape
+                    this.heading = (event.webkitCompassHeading + 90) % 360;
+                }
             } else {
                 console.warn('webkitCompassAccuracy is event.webkitCompassAccuracy');
             }
@@ -5064,9 +5071,11 @@ AFRAME.registerComponent('gps-camera', {
         var cameraRotation = this.el.getAttribute('rotation').y;
         var yawRotation = THREE.Math.radToDeg(this.lookControls.yawObject.rotation.y);
         var offset = (heading - (cameraRotation - yawRotation)) % 360;
+        // console.log(heading + ' ' + cameraRotation + ' ' + yawRotation + ' ' + offset);
+        // console.log(this.heading);
         this.lookControls.yawObject.rotation.y = THREE.Math.degToRad(offset);
     },
-    
+
     _onGpsEntityPlaceAdded: function() {
         // if places are added after camera initialization is finished
         if (this.originCoords) {
